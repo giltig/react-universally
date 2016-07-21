@@ -5,6 +5,7 @@ const webpack = require('webpack');
 const AssetsPlugin = require('assets-webpack-plugin');
 const nodeExternals = require('webpack-node-externals');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
 // @see https://github.com/motdotla/dotenv
 const dotenv = require('dotenv');
@@ -246,6 +247,18 @@ function webpackConfigFactory({ target, mode }, { json }) {
         // This is a production client so we will extract our CSS into
         // CSS files.
         new ExtractTextPlugin({ filename: '[name]-[chunkhash].css', allChunks: true })
+      ),
+
+      ifProdClient(
+        // The manifest file is super helpful in supporting our long term
+        // caching needs.
+        // @see https://github.com/diurnalist/chunk-manifest-webpack-plugin
+        // TODO: This is broken, doesn't support webpack 2 as of yet.
+        // Track the issue here: https://github.com/diurnalist/chunk-manifest-webpack-plugin/issues/12
+        new ChunkManifestPlugin({
+          filename: 'chunk-manifest.json',
+          manifestVariable: 'webpackManifest',
+        })
       ),
     ]),
     module: {
